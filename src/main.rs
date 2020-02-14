@@ -7,7 +7,36 @@ use ndarray::{Axis, Array2, Array};
 // See this document for more understanding about the terminology used here :
 // https://bulbapedia.bulbagarden.net/wiki/User:Tiddlywinks/Map_header_data_structure_in_Generation_I
 
+// TODO -- figure out ledges 
+
 // Conversion between map in ROM and map as stored in memory & working coordinates
+// LedgeTiles:
+// ; (player direction) (tile player standing on) (ledge tile) (input required)
+//     db SPRITE_FACING_DOWN, $2C,$37,D_DOWN
+//     db SPRITE_FACING_DOWN, $39,$36,D_DOWN
+//     db SPRITE_FACING_DOWN, $39,$37,D_DOWN
+//     db SPRITE_FACING_LEFT, $2C,$27,D_LEFT
+//     db SPRITE_FACING_LEFT, $39,$27,D_LEFT
+//     db SPRITE_FACING_RIGHT,$2C,$0D,D_RIGHT
+//     db SPRITE_FACING_RIGHT,$2C,$1D,D_RIGHT
+//     db SPRITE_FACING_RIGHT,$39,$0D,D_RIGHT
+//     db $FF
+//
+// TODO -- every map ID
+enum Map {
+    A,
+    B,
+}
+
+impl Map {
+fn value(&self) -> i32 {
+    match *self {
+        MyEnum::A => 123,
+        MyEnum::B => 456,
+    }
+}
+}
+
 struct World {
     squares: Vec<Vec<Square>>,
 }
@@ -15,9 +44,41 @@ struct World {
 struct Warp {
 }
 
+enum SpriteType {
+    Item,
+    Trainer,
+    Person, // Not a battler
+    Boulder
+}
+
 struct Sprite {
+    x_coord: u8,
+    y_coord: u8,
+    sprite_type: SpriteType
 }
 // Not referenced in the above document - a 16x16 walkable location, the size of the player
+//
+//
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+enum TileProperties {
+    Grass,
+    Warp(u8,u8,u8),
+    Ledge(Direction), 
+    Water,
+    Tree,
+    Spinner(Direction),
+}
+
+// waterfall?
+// elevators / movements that arent warp based
+// Spinner tiles -- viridian gym and rocket hideout
+// TODO -- populate sprites from memory 
+
 struct Square {
     walkable: bool,
     map_id: u8,
@@ -25,7 +86,6 @@ struct Square {
     y_coord: u8,
     grass: bool,
     sprite: Option<Sprite>,
-    warp: Option<Warp>
     // TODO: warp
     // mutable information about sprites?
 }
