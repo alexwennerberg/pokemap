@@ -1,3 +1,4 @@
+use mooneye_gb_frontend;
 use std::fs::read;
 use std::fs::read_dir;
 use std::io::prelude::*;
@@ -28,14 +29,14 @@ enum Map {
     B,
 }
 
-impl Map {
-fn value(&self) -> i32 {
-    match *self {
-        MyEnum::A => 123,
-        MyEnum::B => 456,
-    }
-}
-}
+// impl Map {
+// fn value(&self) -> i32 {
+//     match *self {
+//         MyEnum::A => 123,
+//         MyEnum::B => 456,
+//     }
+// }
+// }
 
 struct World {
     squares: Vec<Vec<Square>>,
@@ -90,15 +91,15 @@ struct Square {
     // mutable information about sprites?
 }
 
-impl Square {
-    fn successors(&self) {// -> Vec<Square> {
-    if let Some(w) = &self.warp {
-    }
-    else {
-    }
-    }
+// impl Square {
+//     fn successors(&self) {// -> Vec<Square> {
+//     if let Some(w) = &self.warp {
+//     }
+//     else {
+//     }
+//     }
 
-}
+// }
 
 fn get_squares(world_file: &str) {
     // get tile/bockset
@@ -114,7 +115,6 @@ fn get_squares(world_file: &str) {
     //
     // Still new to this library -- this is probably sloppy
     let mut pallet_town = read("PalletTown.blk").unwrap();
-    println!("{:?}", pallet_town_array);
     let mut tile_array: Array2<u8> = Array2::zeros((9*4, 10*4));
     for (i, mut chunk) in tile_array.exact_chunks_mut((4, 4)).into_iter().enumerate() {
             chunk.assign(&Array2::from_shape_vec((4,4), blocks[pallet_town[i as usize] as usize].to_vec()).unwrap());

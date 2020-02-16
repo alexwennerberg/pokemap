@@ -1,5 +1,5 @@
 [package]
-name = "pokemap"
+name = "pokemon_ai"
 version = "0.1.0"
 authors = ["alex wennerberg <alex@alexwennerberg.com>"]
 edition = "2018"
@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 ndarray = "*"
 pathfinding = "2.0.4"
+mooneye_gb_frontend = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
