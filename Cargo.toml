@@ -9,4 +9,9 @@ edition = "2018"
 [dependencies]
 ndarray = "*"
 pathfinding = "2.0.4"
-mooneye_gb_frontend = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
+log = "*"
+env_logger ="0.7"
+# mooneye_gb_frontend = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
+# mooneye_gb_core = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
+mooneye_gb_frontend = {path = "../mooneye-gb"}
+mooneye_gb_core = {path = "../mooneye-gb/core"}
