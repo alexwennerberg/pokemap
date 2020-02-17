@@ -1,0 +1,5 @@
+export BOOT_ROM="" # TODO -- configure
+export POKEMON_CARTRIDGE="pokemonblue.gb"
+export WARP_SPEED=16
+export RUST_LOG=debug
+
