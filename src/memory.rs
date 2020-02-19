@@ -26,6 +26,7 @@ pub const MOVEMENT_DISABLED: u16 = 0xcfc4;
 
 pub const CURRENT_MAP: u16 = 0xD35E;
 
+pub const MOVEMENT_SIMULATED: u16 = 0xcd38; // 0 if not simulated, some value otherwise
 
 // // bagItems d31e
 // // player money -- d347. 3 byte range I believe. create byte range function
