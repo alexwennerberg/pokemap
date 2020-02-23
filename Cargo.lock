@@ -941,6 +941,7 @@ dependencies = [
  "mooneye_gb_frontend",
  "ndarray",
  "pathfinding",
+ "regex",
 ]
 
 [[package]]
