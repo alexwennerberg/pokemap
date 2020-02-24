@@ -174,20 +174,18 @@ impl Map {
         // I think my indeces are messed up
         let squares: Array2<TileProperties> =
             Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
-        if map_header_file == "maps/headers/Route1.asm" {
-            for (x, i) in squares.axis_iter(Axis(0)).enumerate() {
-                for (y, j) in i.iter().enumerate() {
-                    let vis = match j {
-                        TileProperties::Walkable => "░",
-                        TileProperties::NonWalkable => "█",
-                        TileProperties::Ledge(_) => "═",
-                        _ => "",
-                    };
-                    print!("{}", vis);
-                }
-                print!("\n");
+        for (x, i) in squares.axis_iter(Axis(0)).enumerate() {
+            for (y, j) in i.iter().enumerate() {
+                let vis = match j {
+                    TileProperties::Walkable => "░",
+                    TileProperties::NonWalkable => "█",
+                    TileProperties::Ledge(_) => "═",
+                    _ => "",
+                };
+                print!("{}", vis);
             }
-            panic!();
+            print!("\n");
+            // panic!();
         }
         // Iterate over squares
         //
