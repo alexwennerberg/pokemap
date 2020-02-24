@@ -177,12 +177,13 @@ impl Map {
         if map_header_file == "maps/headers/Route1.asm" {
             for (x, i) in squares.axis_iter(Axis(0)).enumerate() {
                 for (y, j) in i.iter().enumerate() {
-                    match j {
-                        TileProperties::Walkable => print!("░"),
-                        TileProperties::NonWalkable => print!("█"),
-                        TileProperties::Ledge(_) => print!("═"),
-                        _ => (),
-                    }
+                    let vis = match j {
+                        TileProperties::Walkable => "░",
+                        TileProperties::NonWalkable => "█",
+                        TileProperties::Ledge(_) => "═",
+                        _ => "",
+                    };
+                    print!("{}", vis);
                 }
                 print!("\n");
             }
