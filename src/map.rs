@@ -57,19 +57,24 @@ impl Square {
     }
 }
 
+#[derive(Debug)]
 enum Direction {
     Up,
     Down,
     Left,
     Right,
 }
+
+#[derive(Debug)]
 enum TileProperties {
-    Grass,
+    // Grass,
+    Walkable,
+    NonWalkable,
     Warp(u8, u8, u8),
     Ledge(Direction),
-    Water,
-    Tree,
-    Spinner(Direction),
+    // Water,
+    // Tree,
+    // Spinner(Direction),
 }
 // waterfall?
 // elevators / movements that arent warp based
@@ -78,10 +83,11 @@ enum TileProperties {
 //
 
 struct Map {
-    square: Vec<Square>,
+    squares: HashMap<(u16, u16), Square>,
 }
 
 impl Map {
+    // this is a mess -- clean up later
     fn from_files(map_header_file: &str, map_data_file: &str) {
         // get tile/bockset
         // get height and width
@@ -110,8 +116,8 @@ impl Map {
             if &cap[1].to_lowercase().replace("_", "")
                 == &map_header_file[13..map_header_file.len() - 4].to_lowercase()
             {
-                map_width = cap[2].parse().unwrap();
-                map_height = cap[3].parse().unwrap();
+                map_height = cap[2].parse().unwrap();
+                map_width = cap[3].parse().unwrap();
             }
         }
         debug!("width: {} height: {}", map_width, map_height);
@@ -126,20 +132,64 @@ impl Map {
         //
         // Still new to this library -- this is probably sloppy
         let mut map_data = read(map_data_file).unwrap();
-        let mut tile_array: Array2<u8> = Array2::zeros((map_width * 4, map_height * 4));
+        let mut tile_array: Array2<u8> = Array2::zeros((map_height * 4, map_width * 4));
         for (i, mut chunk) in tile_array.exact_chunks_mut((4, 4)).into_iter().enumerate() {
             chunk.assign(
                 &Array2::from_shape_vec((4, 4), blocks[map_data[i as usize] as usize].to_vec())
                     .unwrap(),
             );
         }
-        for (x, i) in tile_array.axis_iter(Axis(1)).enumerate() {
+        // create tile properties
+        // create
+        let mut values = vec![];
+        for (x, i) in tile_array.axis_iter(Axis(0)).enumerate() {
             for (y, j) in i.iter().enumerate() {
-                if x % 2 == 0 && y % 2 == 1 {
-                    // Bottom left corner of each tile
+                if x % 2 == 1 && y % 2 == 0 {
+                    // Bottom left corner of each tile checks collision data
+                    let walkable = walkable_tiles.contains(j);
+                    if walkable {
+                        values.push(TileProperties::Walkable);
+                    } else if tileset == "OVERWORLD" {
+                        // Ledge tiles
+                        let t = match j {
+                            55 => Some(TileProperties::Ledge(Direction::Down)),
+                            54 => Some(TileProperties::Ledge(Direction::Down)),
+                            39 => Some(TileProperties::Ledge(Direction::Left)),
+                            13 => Some(TileProperties::Ledge(Direction::Right)),
+                            29 => Some(TileProperties::Ledge(Direction::Right)),
+                            _ => None,
+                        };
+                        if let Some(t) = t {
+                            values.push(t);
+                        } else {
+                            values.push(TileProperties::NonWalkable);
+                        }
+                    } else {
+                        values.push(TileProperties::NonWalkable);
+                    }
                 }
             }
         }
+
+        // I think my indeces are messed up
+        let squares: Array2<TileProperties> =
+            Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
+        if map_header_file == "maps/headers/Route1.asm" {
+            for (x, i) in squares.axis_iter(Axis(0)).enumerate() {
+                for (y, j) in i.iter().enumerate() {
+                    match j {
+                        TileProperties::Walkable => print!("░"),
+                        TileProperties::NonWalkable => print!("█"),
+                        TileProperties::Ledge(_) => print!("═"),
+                        _ => (),
+                    }
+                }
+                print!("\n");
+            }
+            panic!();
+        }
+        // Iterate over squares
+        //
     }
 }
 
