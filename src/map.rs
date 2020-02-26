@@ -21,16 +21,28 @@ use std::fs::{read, read_dir, read_to_string};
 // https://bulbapedia.bulbagarden.net/wiki/User:Tiddlywinks/Map_header_data_structure_in_Generation_I
 
 // TODO -- figure out ledges
+//
 
-struct Square {
-    walkable: bool,
+#[derive(Debug, Eq, Hash)]
+struct Coordinate {
     map_id: u8,
-    x_coord: u8,
-    y_coord: u8,
-    grass: bool,
+    x: u8,
+    y: u8
+}
+struct Square {
+    // grass: bool,
+    // sprite -- mutable properties
+    // other_barrier: Option<Barrier>,
     sprite: Option<Sprite>,
-    // TODO: warp
-    // mutable information about sprites?
+    // properties -- fixed properties
+    properties: TileProperty,
+    // which one is tree?
+}
+
+impl Square {
+    fn successors(&self, world: &HashMap<u8, Map>) -> Vec<Square> {
+        vec![]
+    }
 }
 
 enum SpriteType {
@@ -51,12 +63,6 @@ struct Sprite {
 
 struct Warp {}
 
-impl Square {
-    fn successors(&self) -> Vec<Square> {
-        vec![]
-    }
-}
-
 #[derive(Debug)]
 enum Direction {
     Up,
@@ -66,11 +72,11 @@ enum Direction {
 }
 
 #[derive(Debug)]
-enum TileProperties {
+enum TileProperty {
     // Grass,
     Walkable,
     NonWalkable,
-    Warp(u8, u8, u8),
+    Warp(Coordinate),
     Ledge(Direction),
     // Water,
     // Tree,
@@ -83,13 +89,16 @@ enum TileProperties {
 //
 
 struct Map {
-    squares: HashMap<(u16, u16), Square>,
+    map_id: u8,
+    squares: HashMap<Coordinate, Square>,
 }
 
 impl Map {
     // this is a mess -- clean up later
-    fn from_files(map_header_file: &str, map_data_file: &str) {
+    fn from_files(map_header_file: &str, map_data_file: &str) -> Map{
         // get tile/bockset
+        // get MAP ID
+        let map_id: u8 = 1;
         // get height and width
         debug!("From {} {}", map_header_file, map_data_file);
         let header_data = read_to_string(map_header_file).unwrap();
@@ -148,47 +157,61 @@ impl Map {
                     // Bottom left corner of each tile checks collision data
                     let walkable = walkable_tiles.contains(j);
                     if walkable {
-                        values.push(TileProperties::Walkable);
+                        values.push(TileProperty::Walkable);
                     } else if tileset == "OVERWORLD" {
                         // Ledge tiles
                         let t = match j {
-                            55 => Some(TileProperties::Ledge(Direction::Down)),
-                            54 => Some(TileProperties::Ledge(Direction::Down)),
-                            39 => Some(TileProperties::Ledge(Direction::Left)),
-                            13 => Some(TileProperties::Ledge(Direction::Right)),
-                            29 => Some(TileProperties::Ledge(Direction::Right)),
+                            55 => Some(TileProperty::Ledge(Direction::Down)),
+                            54 => Some(TileProperty::Ledge(Direction::Down)),
+                            39 => Some(TileProperty::Ledge(Direction::Left)),
+                            13 => Some(TileProperty::Ledge(Direction::Right)),
+                            29 => Some(TileProperty::Ledge(Direction::Right)),
                             _ => None,
                         };
                         if let Some(t) = t {
                             values.push(t);
                         } else {
-                            values.push(TileProperties::NonWalkable);
+                            values.push(TileProperty::NonWalkable);
                         }
                     } else {
-                        values.push(TileProperties::NonWalkable);
+                        values.push(TileProperty::NonWalkable);
                     }
                 }
             }
         }
 
         // I think my indeces are messed up
-        let squares: Array2<TileProperties> =
+        let squares: Array2<TileProperty> =
             Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
-        for (x, i) in squares.axis_iter(Axis(0)).enumerate() {
-            for (y, j) in i.iter().enumerate() {
-                let vis = match j {
-                    TileProperties::Walkable => "░",
-                    TileProperties::NonWalkable => "█",
-                    TileProperties::Ledge(_) => "═",
-                    _ => "",
-                };
-                print!("{}", vis);
+        print_map(squares);
+        let squares = HashMap::new();
+        for (y, i) in squares.axis_iter(Axis(0)).enumerate() {
+            for (x, tile_prop) in i.iter().enumerate() {
+                squares.insert(Coordinate{map_id: map_id, x: x, y:y}, tile_prop);
             }
-            print!("\n");
-            // panic!();
         }
-        // Iterate over squares
+        // panic!();
+        // generate path vectors
         //
+        Map {
+            id: map_id,
+            squares: squares
+        }
+    }
+}
+
+fn print_map(map: Array2<TileProperty>) {
+    for (y, i) in map.axis_iter(Axis(0)).enumerate() {
+        for (x, j) in i.iter().enumerate() {
+            let vis = match j {
+                TileProperty::Walkable => "░",
+                TileProperty::NonWalkable => "█",
+                TileProperty::Ledge(_) => "═",
+                _ => "",
+            };
+            print!("{}", x);
+        }
+        print!("\n");
     }
 }
 
