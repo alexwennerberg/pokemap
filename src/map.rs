@@ -23,19 +23,21 @@ use std::fs::{read, read_dir, read_to_string};
 // TODO -- figure out ledges
 //
 
-#[derive(Debug, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 struct Coordinate {
     map_id: u8,
     x: u8,
     y: u8
 }
+
+#[derive(Debug)]
 struct Square {
     // grass: bool,
     // sprite -- mutable properties
     // other_barrier: Option<Barrier>,
     sprite: Option<Sprite>,
     // properties -- fixed properties
-    properties: TileProperty,
+    property: TileProperty,
     // which one is tree?
 }
 
@@ -45,6 +47,7 @@ impl Square {
     }
 }
 
+#[derive(Debug)]
 enum SpriteType {
     Item,
     Trainer,
@@ -52,6 +55,7 @@ enum SpriteType {
     Boulder,
 }
 
+#[derive(Debug)]
 struct Sprite {
     x_coord: u8,
     y_coord: u8,
@@ -63,7 +67,7 @@ struct Sprite {
 
 struct Warp {}
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Direction {
     Up,
     Down,
@@ -71,7 +75,7 @@ enum Direction {
     Right,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum TileProperty {
     // Grass,
     Walkable,
@@ -88,6 +92,7 @@ enum TileProperty {
 // TODO -- populate sprites from memory
 //
 
+#[derive(Debug)]
 struct Map {
     map_id: u8,
     squares: HashMap<Coordinate, Square>,
@@ -106,6 +111,7 @@ impl Map {
         let caps = re.captures(&header_data).unwrap();
         let tileset = caps.get(1).map_or("", |m| m.as_str());
 
+        // We need to manually rename a few entries -- unclear why
         let tileset = match tileset {
             "DOJO" => "gym",
             "MART" => "pokecenter",
@@ -183,24 +189,25 @@ impl Map {
         // I think my indeces are messed up
         let squares: Array2<TileProperty> =
             Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
-        print_map(squares);
-        let squares = HashMap::new();
+        print_map(&squares);
+        let mut square_map = HashMap::new();
         for (y, i) in squares.axis_iter(Axis(0)).enumerate() {
             for (x, tile_prop) in i.iter().enumerate() {
-                squares.insert(Coordinate{map_id: map_id, x: x, y:y}, tile_prop);
+                square_map.insert(Coordinate{map_id: map_id, x: x as u8, y:y as u8}, Square{
+                    sprite: None,
+                    property: *tile_prop});
             }
         }
-        // panic!();
-        // generate path vectors
-        //
-        Map {
-            id: map_id,
-            squares: squares
-        }
+        let res = Map {
+            map_id: map_id,
+            squares: square_map
+        };
+        println!("{:?}", res);
+        res
     }
 }
 
-fn print_map(map: Array2<TileProperty>) {
+fn print_map(map: &Array2<TileProperty>) {
     for (y, i) in map.axis_iter(Axis(0)).enumerate() {
         for (x, j) in i.iter().enumerate() {
             let vis = match j {
@@ -209,7 +216,7 @@ fn print_map(map: Array2<TileProperty>) {
                 TileProperty::Ledge(_) => "═",
                 _ => "",
             };
-            print!("{}", x);
+            print!("{}", vis);
         }
         print!("\n");
     }
