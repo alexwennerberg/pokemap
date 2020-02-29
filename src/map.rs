@@ -35,6 +35,7 @@ struct Square {
     // grass: bool,
     // sprite -- mutable properties
     // other_barrier: Option<Barrier>,
+    coordinate: Coordinate,
     sprite: Option<Sprite>,
     // properties -- fixed properties
     property: TileProperty,
@@ -61,9 +62,6 @@ struct Sprite {
     y_coord: u8,
     sprite_type: SpriteType,
 }
-// struct World {
-//     squares: Vec<Vec<Square>>,
-// }
 
 struct Warp {}
 
@@ -74,6 +72,7 @@ enum Direction {
     Left,
     Right,
 }
+
 
 #[derive(Debug, Copy, Clone)]
 enum TileProperty {
@@ -103,7 +102,6 @@ impl Map {
     fn from_files(map_header_file: &str, map_data_file: &str) -> Map{
         // get tile/bockset
         // get MAP ID
-        let map_id: u8 = 1;
         // get height and width
         debug!("From {} {}", map_header_file, map_data_file);
         let header_data = read_to_string(map_header_file).unwrap();
@@ -123,19 +121,22 @@ impl Map {
         };
 
         // get height and width. inefficient but who cares
+        // get map id also
         let coord_data = read_to_string("maps/map_constants.asm").unwrap();
-        let re = Regex::new(r"mapconst ([0-9A-Z_]*), *([0-9]*), *([0-9]*)").unwrap();
+        let re = Regex::new(r"mapconst ([0-9A-Z_]*), *([0-9]*), *([0-9]*) ; \$([A-Z0-9][A-Z0-9])").unwrap();
         let mut map_width: usize = 0;
         let mut map_height: usize = 0;
+        let mut map_id: u8 = 0;
         for cap in re.captures_iter(&coord_data) {
             if &cap[1].to_lowercase().replace("_", "")
                 == &map_header_file[13..map_header_file.len() - 4].to_lowercase()
             {
                 map_height = cap[2].parse().unwrap();
                 map_width = cap[3].parse().unwrap();
+                map_id = u8::from_str_radix(&cap[4], 16).unwrap();
             }
         }
-        debug!("width: {} height: {}", map_width, map_height);
+        debug!("map id: {} width: {} height: {}", map_id, map_width, map_height);
 
         let block_file_name = format!("maps/blocksets/{}.bst", tileset.to_lowercase());
         let block_file = read(block_file_name).unwrap();
@@ -190,10 +191,12 @@ impl Map {
         let squares: Array2<TileProperty> =
             Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
         print_map(&squares);
-        let mut square_map = HashMap::new();
+        let mut square_map = HashMap::new(); // replace with hashset
         for (y, i) in squares.axis_iter(Axis(0)).enumerate() {
             for (x, tile_prop) in i.iter().enumerate() {
-                square_map.insert(Coordinate{map_id: map_id, x: x as u8, y:y as u8}, Square{
+                let coord = Coordinate{map_id: map_id, x: x as u8, y:y as u8};
+                square_map.insert(coord, Square{
+                    coordinate: coord,
                     sprite: None,
                     property: *tile_prop});
             }
@@ -202,7 +205,7 @@ impl Map {
             map_id: map_id,
             squares: square_map
         };
-        println!("{:?}", res);
+        //println!("{:?}", res);
         res
     }
 }
@@ -223,6 +226,7 @@ fn print_map(map: &Array2<TileProperty>) {
 }
 
 pub fn initialize_maps() {
+    let mut world: HashMap<u8, Map> = HashMap::new();
     for map_header in read_dir("maps/headers").unwrap() {
         let header_path = map_header.unwrap().path();
         let name = header_path.file_stem().unwrap().to_str().unwrap();
@@ -230,6 +234,8 @@ pub fn initialize_maps() {
             // TODO -- fix undegroundpathnorth south
             let data_file = &format!("maps/data/{}.blk", name);
             let map = Map::from_files(header_path.to_str().unwrap(), data_file);
+            world.insert(map.map_id, map);
         }
     }
+    //
 }
