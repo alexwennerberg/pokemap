@@ -43,8 +43,31 @@ struct Square {
 }
 
 impl Square {
-    fn successors(&self, world: &HashMap<u8, Map>) -> Vec<Square> {
-        vec![]
+    fn successors(&self, world: &'static HashMap<u8, Map>) -> Vec<&Square> {
+        let mut successors = vec![];
+        let curr_map = world.get(&self.coordinate.map_id).unwrap();
+        for direction in [Direction::Up, Direction::Down, Direction::Left, Direction::Right].iter() {
+            let new_x_y: (u8, u8)= match direction {
+                Direction::Up => (self.coordinate.x, self.coordinate.y -1),
+                Direction::Down => (self.coordinate.x, self.coordinate.y +1),
+                Direction::Left => (self.coordinate.x - 1, self.coordinate.y),
+                Direction::Right => (self.coordinate.x + 1, self.coordinate.y),
+            };
+            let coord_to_check = Coordinate{map_id: self.coordinate.map_id, x: new_x_y.0, y: new_x_y.1};
+            // if it exists
+            if let Some(s) =  curr_map.squares.get(&coord_to_check) {
+                // if it is walkable
+                match s.property {
+                    TileProperty::Walkable => if self.sprite.is_none(){ successors.push(s);},
+                    TileProperty::Ledge(d) => (),
+                    TileProperty::NonWalkable => (),
+                    // a mess obvi
+                    TileProperty::Warp(coord) => successors.push(world.get(&coord.map_id).unwrap().squares.get(&coord).unwrap()),
+                }
+                //figure out warps
+            }
+        }
+        successors
     }
 }
 
