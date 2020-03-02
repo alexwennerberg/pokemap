@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 ndarray = "*"
-pathfinding = "2.0.4"
+pathfinding = "2.0"
 log = "*"
 env_logger ="0.7"
 regex = "1"
