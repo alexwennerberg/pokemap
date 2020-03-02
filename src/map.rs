@@ -1,6 +1,6 @@
 use log::debug;
 use ndarray::{Array, Array2, Axis};
-use pathfinding::prelude::dfs;
+use pathfinding::prelude::{bfs, dfs};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::fs::{read, read_dir, read_to_string};
@@ -282,9 +282,8 @@ pub fn initialize_maps() {
         }
     }
     // TODO work this out https://docs.rs/pathfinding/2.0.4/pathfinding/directed/dfs/fn.dfs.html
-    println!("path"); // takes 5 seconds...
-    let path = dfs(
-        Coordinate {
+    let path = bfs(
+        &Coordinate {
             map_id: 12,
             x: 10,
             y: 34,
