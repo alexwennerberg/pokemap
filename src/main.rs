@@ -100,7 +100,7 @@ impl Game {
 
 fn main() {
     env_logger::init();
-    map::initialize_maps();
+    let mut world = map::World::initialize();
     // let mut game = Game::new();
     // game.run();
 }

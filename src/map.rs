@@ -33,11 +33,38 @@ struct Coordinate {
     y: u8,
 }
 
-struct World {
+pub struct World {
     data: HashMap<Coordinate, Square>,
 }
 
 impl World {
+    pub fn initialize() -> World {
+        let mut world = World {
+            data: HashMap::new(),
+        };
+        for map_header in read_dir("maps/headers").unwrap() {
+            let header_path = map_header.unwrap().path();
+            let name = header_path.file_stem().unwrap().to_str().unwrap();
+            if !name.contains("Copy") && !name.contains("UndergroundPathNorthSouth") {
+                // TODO -- fix undegroundpathnorth south
+                let data_file = &format!("maps/data/{}.blk", name);
+                for (coord, square) in squares_from_files(header_path.to_str().unwrap(), data_file)
+                {
+                    world.data.insert(coord, square);
+                }
+            }
+        }
+        world
+    }
+
+    fn get_path(&self, start: Coordinate, destination: Coordinate) {
+        let path = bfs(
+            &start,
+            |x| self.successors(&x).into_iter(),
+            |c| *c == destination,
+        );
+    }
+
     fn successors(&self, coordinate: &Coordinate) -> Vec<Coordinate> {
         let square = self.data.get(coordinate).unwrap(); // error handling
         let mut successors = vec![];
@@ -72,7 +99,9 @@ impl World {
                     TileProperty::Ledge(d) => (),
                     TileProperty::NonWalkable => (),
                     // a mess obvi
-                    TileProperty::Warp(coord) => successors.push(self.data.get(&coord).unwrap().coordinate),
+                    TileProperty::Warp(coord) => {
+                        successors.push(self.data.get(&coord).unwrap().coordinate)
+                    }
                 }
                 //figure out warps
             }
@@ -264,42 +293,4 @@ fn print_map(map: &Array2<TileProperty>) {
         }
         print!("\n");
     }
-}
-
-pub fn initialize_maps() {
-    let mut world = World {
-        data: HashMap::new(),
-    };
-    for map_header in read_dir("maps/headers").unwrap() {
-        let header_path = map_header.unwrap().path();
-        let name = header_path.file_stem().unwrap().to_str().unwrap();
-        if !name.contains("Copy") && !name.contains("UndergroundPathNorthSouth") {
-            // TODO -- fix undegroundpathnorth south
-            let data_file = &format!("maps/data/{}.blk", name);
-            for (coord, square) in squares_from_files(header_path.to_str().unwrap(), data_file) {
-                world.data.insert(coord, square);
-            }
-        }
-    }
-    // TODO work this out https://docs.rs/pathfinding/2.0.4/pathfinding/directed/dfs/fn.dfs.html
-    let path = bfs(
-        &Coordinate {
-            map_id: 12,
-            x: 10,
-            y: 34,
-        },
-        |x| {
-            world.successors(&x)
-                .into_iter()
-        },
-        |c| {
-            *c == Coordinate {
-                map_id: 12,
-                x: 10,
-                y: 0,
-            }
-        },
-    );
-    println!("{:?}", path);
-    //
 }
