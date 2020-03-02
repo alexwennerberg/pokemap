@@ -40,12 +40,12 @@ struct Game {
 //     // SwitchBoxPokemon,
 // }
 
-// enum BattleDecision {
-//     UseItem(item),
-//     Move(move_),
-//     Run,
-//     Switch(pokemon)
-// }
+enum BattleDecision {
+     UseItem(u8),
+     Move(u8), // 1-4
+     Run, // not allowed in trainer battle
+     Switch(u8) // pokemon number
+}
 
 impl Game {
     fn new() -> Self {
@@ -133,9 +133,15 @@ impl Game {
         }
     }
 
-    pub fn run_battle() {}
+    pub fn run_battle() {
+        // first iteration -- just randomly pick a move each round
+        // use pokeball 10% of the time if we have one
+    }
 
-    pub fn main_ai() {}
+    pub fn main_ai() {
+        // first iteration -- either interact with a random sprite or go to a warp
+        // use random odds for each
+    }
 }
 
 fn main() {
