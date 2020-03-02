@@ -14,5 +14,5 @@ env_logger ="0.7"
 regex = "1"
 # mooneye_gb_frontend = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
 # mooneye_gb_core = {git = "https://github.com/alexwennerberg/mooneye-gb.git", branch="older-build"}
-mooneye_gb_frontend = {path = "../mooneye-gb"}
-mooneye_gb_core = {path = "../mooneye-gb/core"}
+mooneye_gb_frontend = {path = "./mooneye-gb"}
+mooneye_gb_core = {path = "./mooneye-gb/core"}
