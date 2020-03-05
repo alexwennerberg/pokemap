@@ -1,4 +1,4 @@
-use log::debug;
+use log::{debug, info};
 use ndarray::{Array, Array2, Axis};
 use pathfinding::prelude::{bfs, dfs};
 use regex::Regex;
@@ -39,6 +39,7 @@ pub struct World {
 
 impl World {
     pub fn initialize() -> World {
+        info!("Initializing world from ROM data");
         let mut world = World {
             data: HashMap::new(),
         };
@@ -258,7 +259,7 @@ fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordi
     // I think my indeces are messed up
     let squares: Array2<TileProperty> =
         Array2::from_shape_vec((map_height * 2, map_width * 2), values).unwrap();
-    print_map(&squares);
+    // print_map(&squares);
     let mut result = vec![];
     for (y, i) in squares.axis_iter(Axis(0)).enumerate() {
         for (x, tile_prop) in i.iter().enumerate() {

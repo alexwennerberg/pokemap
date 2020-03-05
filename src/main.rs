@@ -8,13 +8,13 @@ use mooneye_gb_frontend::frontend::{InGameState, SdlFrontend};
 use std::env;
 use std::path::Path;
 
-pub mod battle;
 pub mod map;
 pub mod memory;
 
 struct Game {
     pub frontend: SdlFrontend,
     pub state: InGameState,
+    pub world: map::World
     // keep other ai stuff here
 }
 
@@ -49,6 +49,7 @@ enum BattleDecision {
 
 impl Game {
     fn new() -> Self {
+        let mut world = map::World::initialize();
         let bootrom = Bootrom::lookup(&[]);
         let path = env::var("POKEMON_CARTRIDGE").unwrap();
         let cartridge = Cartridge::from_path(&Path::new(&path)).unwrap();
@@ -57,11 +58,14 @@ impl Game {
         Game {
             frontend: frontend,
             state: state,
+            world: world
         }
     }
 
-    fn run_frames(&mut self, num: u32, draw: bool) {
+    fn run_frames(&mut self, num: u32) {
         // headless gives me about 2x speedup
+        // Disabled for now.
+        let draw = true;
         for _ in 0..num {
             if draw {
                 self.frontend.next_frame(&mut self.state, true).unwrap();
@@ -83,40 +87,40 @@ impl Game {
 
     /// Navigate beginning of game -- naming characters, etc
     fn navigate_load_screen(&mut self) {
-        debug!("Going through startup dialogue with Prof Oak");
-        for i in 0..800 {
+        info!("Going through startup dialogue with Prof Oak");
+        for _ in 0..325 {
             // first iteration -- just smash A for a while
             self.key_down(GbKey::A);
-            self.run_frames(1, false);
+            self.run_frames(1);
             self.key_up(GbKey::A);
-            self.run_frames(1, false);
+            self.run_frames(1);
         }
-        for _ in 0..50 {
+        for _ in 0..25 {
             self.key_down(GbKey::B);
-            self.run_frames(1, false);
+            self.run_frames(1);
             self.key_up(GbKey::B);
-            self.run_frames(1, false);
+            self.run_frames(1);
         }
     }
     fn walk_randomly(&mut self) {
         loop {
             let walk_length = 2;
             self.key_down(GbKey::Right);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_up(GbKey::Right);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_down(GbKey::Down);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_up(GbKey::Down);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_down(GbKey::Left);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_up(GbKey::Left);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_down(GbKey::Up);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
             self.key_up(GbKey::Up);
-            self.run_frames(walk_length, true);
+            self.run_frames(walk_length);
         }
     }
 
@@ -126,19 +130,22 @@ impl Game {
     }
 
     fn dumb_ai(&mut self) {
+        self.navigate_load_screen();
         match memory::IS_IN_BATTLE {
-            1 => run_battle(), // wild
-            2 => run_battle(), // trainer
-            _ => main_ai()
+            1 => self.run_battle(), // wild
+            2 => self.run_battle(), // trainer
+            _ => self.main_ai()
         }
     }
 
-    pub fn run_battle() {
+    pub fn run_battle(&mut self) {
+        debug!("Running battle AI");
         // first iteration -- just randomly pick a move each round
         // use pokeball 10% of the time if we have one
     }
 
-    pub fn main_ai() {
+    pub fn main_ai(&mut self) {
+        debug!("Running main AI");
         // first iteration -- either interact with a random sprite or go to a warp
         // use random odds for each
     }
@@ -146,7 +153,6 @@ impl Game {
 
 fn main() {
     env_logger::init();
-    let mut world = map::World::initialize();
-    // let mut game = Game::new();
-    // game.run();
+    let mut game = Game::new();
+    game.dumb_ai();
 }
