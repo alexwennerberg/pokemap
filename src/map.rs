@@ -27,10 +27,10 @@ use std::fs::{read, read_dir, read_to_string};
 //
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-struct Coordinate {
-    map_id: u8,
-    x: u8,
-    y: u8,
+pub struct Coordinate {
+    pub map_id: u8,
+    pub x: u8,
+    pub y: u8,
 }
 
 pub struct World {
@@ -58,15 +58,17 @@ impl World {
         world
     }
 
-    fn get_path(&self, start: Coordinate, destination: Coordinate) {
+    // Direction to get to next square
+    pub fn get_path(&self, start: Coordinate, destination:  Coordinate) {
         let path = bfs(
-            &start,
-            |x| self.successors(&x).into_iter(),
-            |c| *c == destination,
+            &(None, start),
+            |x| self.successors(&x.1).into_iter(),
+            |c| c.1 == destination,
         );
+        println!("{:?}", path);
     }
 
-    fn successors(&self, coordinate: &Coordinate) -> Vec<Coordinate> {
+    fn successors(&self, coordinate: &Coordinate) -> Vec<(Option<Direction>, Coordinate)> {
         let square = self.data.get(coordinate).unwrap(); // error handling
         let mut successors = vec![];
         for direction in [
@@ -94,14 +96,14 @@ impl World {
                 match s.property {
                     TileProperty::Walkable => {
                         if square.sprite.is_none() {
-                            successors.push(s.coordinate);
+                            successors.push((Some(*direction), s.coordinate));
                         }
                     }
                     TileProperty::Ledge(d) => (),
                     TileProperty::NonWalkable => (),
                     // a mess obvi
                     TileProperty::Warp(coord) => {
-                        successors.push(self.data.get(&coord).unwrap().coordinate)
+                        successors.push((Some(*direction), self.data.get(&coord).unwrap().coordinate))
                     }
                 }
                 //figure out warps
@@ -140,7 +142,7 @@ struct Sprite {
 
 struct Warp {}
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
 enum Direction {
     Up,
     Down,
