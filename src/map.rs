@@ -43,6 +43,7 @@ impl World {
         let mut world = World {
             data: HashMap::new(),
         };
+        let warps = get_warps();
         for map_header in read_dir("maps/headers").unwrap() {
             let header_path = map_header.unwrap().path();
             let name = header_path.file_stem().unwrap().to_str().unwrap();
@@ -59,13 +60,13 @@ impl World {
     }
 
     // Direction to get to next square
-    pub fn get_path(&self, start: Coordinate, destination:  Coordinate) {
+    pub fn get_path(&self, start: Coordinate, destination:  Coordinate) -> Vec<(Option<Direction>, Coordinate)> {
         let path = bfs(
             &(None, start),
             |x| self.successors(&x.1).into_iter(),
             |c| c.1 == destination,
         );
-        println!("{:?}", path);
+        path.unwrap()
     }
 
     fn successors(&self, coordinate: &Coordinate) -> Vec<(Option<Direction>, Coordinate)> {
@@ -140,10 +141,9 @@ struct Sprite {
     sprite_type: SpriteType,
 }
 
-struct Warp {}
 
 #[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -166,6 +166,37 @@ enum TileProperty {
 // Spinner tiles -- viridian gym and rocket hideout
 // TODO -- populate sprites from memory
 //
+//
+#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
+struct Warp {
+    warp_type: bool, // whether it is a walk-forward warp or 
+    coordinate: Coordinate,
+}
+
+// https://bulbapedia.bulbagarden.net/wiki/User:Tiddlywinks/Map_header_data_structure_in_Generation_I#Warps
+fn get_warps() {
+    debug!("Getting warps and connections");
+    // todo -- get map id somehow
+    let warp_map: HashSet<Warp> = HashSet::new(); 
+    for map_object in read_dir("maps/objects").unwrap() {
+        let map_object_data = read_to_string(map_object.unwrap().path()).unwrap();
+        let re = Regex::new(r"warp ([0-9]*), ([0-9]*), *([0-9]*), ([\-A-Z0-9_]*)").unwrap();
+        let caps = re.captures_iter(&map_object_data);
+        for cap in caps {
+            println!("{:?}", cap);
+            // verify this is correct
+            // see macros/data_macros.asm line 125
+            let y_coord: u8 = cap[1].parse().unwrap();
+            let x_coord: u8 = cap[2].parse().unwrap();
+            let dest_warp_num: u8 = cap[3].parse().unwrap();
+            let dest_map_name = &cap[4]; // Sometimes it's just "previous map": -1
+        }
+
+    }
+    // todo -- get connections
+    panic!()
+}
+
 fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordinate, Square)> {
     // get tile/bockset
     // get MAP ID
@@ -208,6 +239,10 @@ fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordi
         "map id: {} width: {} height: {}",
         map_id, map_width, map_height
     );
+
+    // Get warp data
+    let map_object_file_data =
+        read_to_string(map_header_file.replace("headers", "objects")).unwrap();
 
     let block_file_name = format!("maps/blocksets/{}.bst", tileset.to_lowercase());
     let block_file = read(block_file_name).unwrap();
