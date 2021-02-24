@@ -1,6 +1,6 @@
-# Pokemon AI
+# pokescript
 
-A WIP bot that is able to play pokemon. Not much progress so far, just simple i/o and some partial parsing of the Pokemon map
+An SDK for writing bots that play Pokemon, and an associated bot itself. (WIP)
 
 ## Dependencies 
 This project uses a fork of an old build of mooneye-gb with some tools I wrote for scripting. Maybe I should have used the C bindings for a more popular emulator like mGBA or SameBoy or libgamette, but this is where we are right now & I'm decently familiar with Rust and the mooneye codebase.
