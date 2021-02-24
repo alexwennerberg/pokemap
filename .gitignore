@@ -1,7 +1,4 @@
-/target
-**/*.rs.bk
-*.gb
-mooneye*
+roms
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

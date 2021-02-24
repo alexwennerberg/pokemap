@@ -1,0 +1,13 @@
+# TODO
+map parsing sucks
+
+https://github.com/binji/binjgb
+https://github.com/pokemon-speedrunning/gambatte-speedrun/#shared-library
+SameBoy?
+https://humpheh.github.io/goboy/
+
+https://github.com/LIJI32/SameBoy/blob/8809d8ac2f16d160d3989d9ac6394afe2e39ba17/Core/gb.h#L274-L287
+
+https://github.com/LIJI32/SameBoy/blob/8809d8ac2f16d160d3989d9ac6394afe2e39ba17/Core/memory.h#L9
+
+mgba python bindings -- not maintained it seems like
