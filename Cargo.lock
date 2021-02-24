@@ -697,6 +697,7 @@ dependencies = [
 [[package]]
 name = "mooneye_gb_core"
 version = "0.2.0-pre"
+source = "git+https://github.com/alexwennerberg/mooneye-gb.git?branch=older-build#3e3d6d3d9d16ad37aff075a58d1f6a6a74411c32"
 dependencies = [
  "app_dirs",
  "arrayvec 0.4.12",
@@ -714,6 +715,7 @@ dependencies = [
 [[package]]
 name = "mooneye_gb_frontend"
 version = "0.2.0-pre"
+source = "git+https://github.com/alexwennerberg/mooneye-gb.git?branch=older-build#3e3d6d3d9d16ad37aff075a58d1f6a6a74411c32"
 dependencies = [
  "arraydeque",
  "docopt",
