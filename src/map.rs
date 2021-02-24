@@ -183,7 +183,7 @@ fn get_warps() {
         let re = Regex::new(r"warp ([0-9]*), ([0-9]*), *([0-9]*), ([\-A-Z0-9_]*)").unwrap();
         let caps = re.captures_iter(&map_object_data);
         for cap in caps {
-            println!("{:?}", cap);
+            /* println!("{:?}", cap); */
             // verify this is correct
             // see macros/data_macros.asm line 125
             let y_coord: u8 = cap[1].parse().unwrap();
