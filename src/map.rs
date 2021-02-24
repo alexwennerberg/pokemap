@@ -44,12 +44,12 @@ impl World {
             data: HashMap::new(),
         };
         let warps = get_warps();
-        for map_header in read_dir("pokered/maps/headers").unwrap() {
+        for map_header in read_dir("pokered/data/mapHeaders").unwrap() {
             let header_path = map_header.unwrap().path();
             let name = header_path.file_stem().unwrap().to_str().unwrap();
             if !name.contains("Copy") && !name.contains("UndergroundPathNorthSouth") {
                 // TODO -- fix undegroundpathnorth south
-                let data_file = &format!("pokered/maps/data/{}.blk", name);
+                let data_file = &format!("pokered/maps/{}.blk", name);
                 for (coord, square) in squares_from_files(header_path.to_str().unwrap(), data_file)
                 {
                     world.data.insert(coord, square);
@@ -178,7 +178,7 @@ fn get_warps() {
     debug!("Getting warps and connections");
     // todo -- get map id somehow
     let warp_map: HashSet<Warp> = HashSet::new(); 
-    for map_object in read_dir("pokered/data/maps/objects").unwrap() {
+    for map_object in read_dir("pokered/data/mapObjects").unwrap() {
         let map_object_data = read_to_string(map_object.unwrap().path()).unwrap();
         let re = Regex::new(r"warp ([0-9]*), ([0-9]*), *([0-9]*), ([\-A-Z0-9_]*)").unwrap();
         let caps = re.captures_iter(&map_object_data);
@@ -193,8 +193,6 @@ fn get_warps() {
         }
 
     }
-    // todo -- get connections
-    panic!()
 }
 
 fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordinate, Square)> {
@@ -220,7 +218,7 @@ fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordi
 
     // get height and width. inefficient but who cares
     // get map id also
-    let coord_data = read_to_string("pokered/maps/map_constants.asm").unwrap();
+    let coord_data = read_to_string("pokered/constants/map_constants.asm").unwrap();
     let re =
         Regex::new(r"mapconst ([0-9A-Z_]*), *([0-9]*), *([0-9]*) ; \$([A-Z0-9][A-Z0-9])").unwrap();
     let mut map_width: usize = 0;
@@ -244,9 +242,9 @@ fn squares_from_files(map_header_file: &str, map_data_file: &str) -> Vec<(Coordi
     let map_object_file_data =
         read_to_string(map_header_file.replace("headers", "objects")).unwrap();
 
-    let block_file_name = format!("pokered/maps/blocksets/{}.bst", tileset.to_lowercase());
+    let block_file_name = format!("pokered/gfx/blocksets/{}.bst", tileset.to_lowercase());
     let block_file = read(block_file_name).unwrap();
-    let collision_file_name = format!("pokered/maps/tilecolls/{}.tilecoll", tileset.to_lowercase());
+    let collision_file_name = format!("pokered/gfx/tilesets/{}.tilecoll", tileset.to_lowercase());
     let collision_file = read(collision_file_name).unwrap();
     let walkable_tiles: HashSet<&u8> = collision_file.iter().collect();
     let blocks: Vec<&[u8]> = block_file.chunks(16).collect();
