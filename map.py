@@ -62,3 +62,6 @@ def get_data():
 parse_constants()
 parse_collision_tiles()
 get_data()
+
+# TODO -- get collision data and make full maps
+# TODO -- get map connection/warp data

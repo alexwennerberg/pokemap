@@ -1,8 +1,7 @@
 # Definitions for relevant memory locations
-# From https://github.com/pret/pokered/blob/master/wram.asm (and potentially other RAM files in
-# that repo)
-
+# https://github.com/pret/pokered/blob/7ecfd641fb47e4a6ed475302bc1deac17473e704/wram.asm
 # Player coordinates
+
 PLAYER_X_COORD = 0xD362
 PLAYER_Y_COORD = 0xD361
 # the id of the currently selected menu item
@@ -22,6 +21,7 @@ MOVEMENT_DISABLED= 0xcfc4
 CURRENT_MAP = 0xD35E;
 
 MOVEMENT_SIMULATED = 0xcd38; # // 0 if not simulated, some value otherwise
+TEXT_BOX_ID = 0xd125
 
 # // // bagItems d31e
 # // // player money -- d347. 3 byte range I believe. create byte range function
